@@ -1,0 +1,10 @@
+#include <windows.h>
+#include "Curve.h"
+
+MyMenu MENU DISCARDABLE 
+BEGIN
+  MENUITEM "&Curve", ID_CURVE
+  MENUITEM "&Clear",   ID_CLEAR
+  MENUITEM "&Exit",    ID_EXIT
+END
+
