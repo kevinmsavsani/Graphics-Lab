@@ -44,3 +44,5 @@ void processCommand(int cmd, HWND hwnd);
 void setDrawMode(MODE mode, HWND hwnd);
 void reDraw(HWND hwnd);
 void processCommonCommand(int cmd, HWND hwnd);
+void performFilling(HWND hwnd);
+

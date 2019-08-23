@@ -185,6 +185,20 @@ void processCommonCommand(int cmd, HWND hwnd)
   }
 }
 
+void processCommand(int cmd, HWND hwnd)
+{
+  switch(cmd)
+  {
+    case ID_FILL:
+      performFilling(hwnd);
+      drawPoly();
+      break;
+    default:
+      processCommonCommand(cmd, hwnd);
+      break;
+  }
+}
+
 LRESULT CALLBACK WindowF(HWND hwnd,UINT message,WPARAM wParam,
                          LPARAM lParam)
 {
@@ -211,7 +225,7 @@ LRESULT CALLBACK WindowF(HWND hwnd,UINT message,WPARAM wParam,
       break;
 
     case WM_RBUTTONDOWN:
-      processRightButtonDown(hwnd);
+      //processRightButtonDown(hwnd);
       break;
 
     case WM_PAINT:

@@ -47,19 +47,6 @@ void performFilling(HWND hwnd)
   setDrawMode(FILLED_MODE, hwnd);
 }
 
-void processCommand(int cmd, HWND hwnd)
-{
-  switch(cmd)
-  {
-    case ID_FILL:
-      performFilling(hwnd);
-      break;
-    default:
-      processCommonCommand(cmd, hwnd);
-      break;
-  }
-}
-
 float area(int x1, int y1, int x2, int y2, int x3, int y3) 
 { 
    return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0); 
