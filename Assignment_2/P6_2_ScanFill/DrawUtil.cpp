@@ -24,6 +24,8 @@ void drawPartialPoly()
     MoveToEx(gDrawData.hdcMem, 
          gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
   }
+  LineTo(gDrawData.hdcMem, 
+         gDrawData.cornerPts[0].x,gDrawData.cornerPts[0].y);
 }
 
 
@@ -93,9 +95,9 @@ void addPointToPolygon(HWND hwnd, int x, int y)
   }
   else
   {
-    MessageBox(hwnd,
-     "Maximum number of points reached, closing the polygon", 
-            "Warning",MB_OK);
+//    MessageBox(hwnd,
+//     "Maximum number of points reached, closing the polygon", 
+//            "Warning",MB_OK);
     processRightButtonDown(hwnd);
   }
   drawPartialPoly();
@@ -142,9 +144,9 @@ void processCommonCommand(int cmd, HWND hwnd)
       setDrawMode(READY_MODE, hwnd);
       break;
     case ID_DRAW_POLY:
-      MessageBox(hwnd,
-    "Click the right button after clicking the last corner point",
-       "Remember",MB_OK);
+//      MessageBox(hwnd,
+//    "Click the right button after clicking the last corner point",
+//       "Remember",MB_OK);
       setDrawMode(DRAW_MODE, hwnd);
       break;
     case ID_EXIT:
