@@ -3,7 +3,7 @@
 
 extern LRESULT CALLBACK WindowF (HWND,UINT,WPARAM,LPARAM);
 char szWinName[] = "MyWin";
-char szTitle[] = "Scan Line Fill";
+char szTitle[] = "Scan Triangle Fill";
 
 int WINAPI WinMain (HINSTANCE hThisInst, HINSTANCE hPrevInst,
                     LPSTR lpszArgs, int nWinMode)

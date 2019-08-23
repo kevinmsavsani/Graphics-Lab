@@ -16,7 +16,7 @@ typedef enum
   FILLED_MODE
 } MODE;
 
-const int nMaxNoOfCornerPts = 9;
+const int nMaxNoOfCornerPts = 100;
 
 typedef struct
 {

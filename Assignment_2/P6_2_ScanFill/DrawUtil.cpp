@@ -17,41 +17,41 @@ void drawPartialPoly()
 {
   MoveToEx(gDrawData.hdcMem, 
     gDrawData.cornerPts[0].x,gDrawData.cornerPts[0].y, NULL);
-  for(int i=1;i < gDrawData.nCornerPts && i < 3; i++)
-  {
-    LineTo(gDrawData.hdcMem, 
-         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
-    MoveToEx(gDrawData.hdcMem, 
-         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
-  }
-  LineTo(gDrawData.hdcMem, 
+	for(int i=1;i < gDrawData.nCornerPts && i < 3; i++)
+	{
+	    LineTo(gDrawData.hdcMem, 
+	         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
+	    MoveToEx(gDrawData.hdcMem, 
+	         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
+	}
+	LineTo(gDrawData.hdcMem, 
          gDrawData.cornerPts[0].x,gDrawData.cornerPts[0].y);
          
   if(gDrawData.nCornerPts >=3){
   	MoveToEx(gDrawData.hdcMem, 
-    gDrawData.cornerPts[3].x,gDrawData.cornerPts[3].y, NULL);
-  for(int i=4;i < gDrawData.nCornerPts && i < 6; i++)
-  {
-    LineTo(gDrawData.hdcMem, 
-         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
-    MoveToEx(gDrawData.hdcMem, 
-         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
-  }
-  LineTo(gDrawData.hdcMem, 
-         gDrawData.cornerPts[3].x,gDrawData.cornerPts[3].y);
+    	gDrawData.cornerPts[3].x,gDrawData.cornerPts[3].y, NULL);
+	for(int i=4;i < gDrawData.nCornerPts && i < 6; i++)
+	{
+	  	LineTo(gDrawData.hdcMem, 
+	       gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
+		MoveToEx(gDrawData.hdcMem, 
+	         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
+	}
+	LineTo(gDrawData.hdcMem, 
+	         gDrawData.cornerPts[3].x,gDrawData.cornerPts[3].y);
   }  
   if(gDrawData.nCornerPts >=6){
   	MoveToEx(gDrawData.hdcMem, 
-    gDrawData.cornerPts[6].x,gDrawData.cornerPts[6].y, NULL);
-  for(int i=7;i < gDrawData.nCornerPts && i < 9; i++)
-  {
-    LineTo(gDrawData.hdcMem, 
-         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
-    MoveToEx(gDrawData.hdcMem, 
-         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
-  }
-  LineTo(gDrawData.hdcMem, 
-         gDrawData.cornerPts[6].x,gDrawData.cornerPts[6].y);
+    	gDrawData.cornerPts[6].x,gDrawData.cornerPts[6].y, NULL);
+	for(int i=7;i < gDrawData.nCornerPts && i < 9; i++)
+	{
+	LineTo(gDrawData.hdcMem, 
+	     gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
+	MoveToEx(gDrawData.hdcMem, 
+	     gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
+	}
+	LineTo(gDrawData.hdcMem, 
+	     gDrawData.cornerPts[6].x,gDrawData.cornerPts[6].y);
   }      
 }
 
@@ -231,3 +231,4 @@ LRESULT CALLBACK WindowF(HWND hwnd,UINT message,WPARAM wParam,
   // Call the default window handler
   return DefWindowProc(hwnd, message, wParam, lParam);
 }
+

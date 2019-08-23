@@ -5,9 +5,9 @@ MYMENU MENU DISCARDABLE
 BEGIN
   POPUP "&Scan Fill"
   BEGIN
-    MENUITEM "&Draw Polygon", ID_DRAW_POLY
-    MENUITEM "&Filling", ID_FILL, GRAYED
+    MENUITEM "&Draw Triangles", ID_DRAW_POLY
   END
+  MENUITEM "&Fill", ID_FILL
   MENUITEM "&Clear", ID_CLEAR
   MENUITEM "&Exit",  ID_EXIT
 END
