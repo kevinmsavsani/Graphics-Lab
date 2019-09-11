@@ -1,18 +1,18 @@
-# Project: P6_2_ScanFill
+# Project: 160101063_ScanFill
 # Makefile created by Dev-C++ 5.11
 
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-RES      = P6_2_ScanFill_private.res
-OBJ      = WMain.o DrawUtil.o Fill.o $(RES)
-LINKOBJ  = WMain.o DrawUtil.o Fill.o $(RES)
-LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib32" -static-libgcc -mwindows -m32
+RES      = 160101063_ScanFill_private.res
+OBJ      = DrawUtil.o Fill.o WMain.o $(RES)
+LINKOBJ  = DrawUtil.o Fill.o WMain.o $(RES)
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -mwindows
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
-BIN      = P6_2_ScanFill.exe
-CXXFLAGS = $(CXXINCS) -m32
-CFLAGS   = $(INCS) -m32
+BIN      = 160101063_ScanFill.exe
+CXXFLAGS = $(CXXINCS) 
+CFLAGS   = $(INCS) 
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -25,15 +25,15 @@ clean: clean-custom
 $(BIN): $(OBJ)
 	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-WMain.o: WMain.cpp
-	$(CPP) -c WMain.cpp -o WMain.o $(CXXFLAGS)
-
 DrawUtil.o: DrawUtil.cpp
 	$(CPP) -c DrawUtil.cpp -o DrawUtil.o $(CXXFLAGS)
 
 Fill.o: Fill.cpp
 	$(CPP) -c Fill.cpp -o Fill.o $(CXXFLAGS)
 
-P6_2_ScanFill_private.res: P6_2_ScanFill_private.rc Fill.rc
-	$(WINDRES) -i P6_2_ScanFill_private.rc -F pe-i386 --input-format=rc -o P6_2_ScanFill_private.res -O coff 
+WMain.o: WMain.cpp
+	$(CPP) -c WMain.cpp -o WMain.o $(CXXFLAGS)
+
+160101063_ScanFill_private.res: 160101063_ScanFill_private.rc Fill.rc
+	$(WINDRES) -i 160101063_ScanFill_private.rc --input-format=rc -o 160101063_ScanFill_private.res -O coff 
 

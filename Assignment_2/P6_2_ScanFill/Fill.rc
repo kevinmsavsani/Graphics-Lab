@@ -6,8 +6,8 @@ BEGIN
   POPUP "&Scan Fill"
   BEGIN
     MENUITEM "&Draw Triangles", ID_DRAW_POLY
+    MENUITEM "&Fill Triangles", ID_FILL, GRAYED
   END
-  MENUITEM "&Fill", ID_FILL
   MENUITEM "&Clear", ID_CLEAR
   MENUITEM "&Exit",  ID_EXIT
 END

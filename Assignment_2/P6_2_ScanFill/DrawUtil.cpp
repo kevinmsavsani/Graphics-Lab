@@ -16,43 +16,28 @@ void drawPoint(int x, int y)
 void drawPartialPoly()
 {
   MoveToEx(gDrawData.hdcMem, 
-    gDrawData.cornerPts[0].x,gDrawData.cornerPts[0].y, NULL);
-	for(int i=1;i < gDrawData.nCornerPts && i < 3; i++)
-	{
-	    LineTo(gDrawData.hdcMem, 
-	         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
-	    MoveToEx(gDrawData.hdcMem, 
-	         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
-	}
-	LineTo(gDrawData.hdcMem, 
-         gDrawData.cornerPts[0].x,gDrawData.cornerPts[0].y);
+    gDrawData.cornerPts[0][0].x,gDrawData.cornerPts[0][0].y, NULL);
+  for(int i=1;i < gDrawData.nCornerPts; i++)
+  {
+
+    // If it is not the first point, join the point
+    if (i%3 != 0)
+    {
+      LineTo(gDrawData.hdcMem, 
+          gDrawData.cornerPts[i/3][i%3].x,gDrawData.cornerPts[i/3][i%3].y);
+    }
          
-  if(gDrawData.nCornerPts >=3){
-  	MoveToEx(gDrawData.hdcMem, 
-    	gDrawData.cornerPts[3].x,gDrawData.cornerPts[3].y, NULL);
-	for(int i=4;i < gDrawData.nCornerPts && i < 6; i++)
-	{
-	  	LineTo(gDrawData.hdcMem, 
-	       gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
-		MoveToEx(gDrawData.hdcMem, 
-	         gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
-	}
-	LineTo(gDrawData.hdcMem, 
-	         gDrawData.cornerPts[3].x,gDrawData.cornerPts[3].y);
-  }  
-  if(gDrawData.nCornerPts >=6){
-  	MoveToEx(gDrawData.hdcMem, 
-    	gDrawData.cornerPts[6].x,gDrawData.cornerPts[6].y, NULL);
-	for(int i=7;i < gDrawData.nCornerPts && i < 9; i++)
-	{
-	LineTo(gDrawData.hdcMem, 
-	     gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y);
-	MoveToEx(gDrawData.hdcMem, 
-	     gDrawData.cornerPts[i].x,gDrawData.cornerPts[i].y, NULL);
-	}
-	LineTo(gDrawData.hdcMem, 
-	     gDrawData.cornerPts[6].x,gDrawData.cornerPts[6].y);
-  }      
+    MoveToEx(gDrawData.hdcMem, 
+         gDrawData.cornerPts[i/3][i%3].x,gDrawData.cornerPts[i/3][i%3].y, NULL);
+    
+    // If it is the last point, join the point to the initial point of the triangle
+    if (i%3 == 2)
+  	{
+  		LineTo(gDrawData.hdcMem, 
+          gDrawData.cornerPts[i/3][0].x,gDrawData.cornerPts[i/3][0].y);
+    
+	  }
+  }
 }
 
 
@@ -81,7 +66,16 @@ void initialize(HWND hwnd, HDC hdc)
 {
   gDrawData.nCornerPts = 0;
   gDrawData.hDrawPen=CreatePen(PS_SOLID, 1, CLR_BOUNDARY);
-  gDrawData.hFillPen=CreatePen(PS_SOLID, 1, CLR_FILL);
+
+  // initialize fill pen colors for various regions
+  gDrawData.hFillPen[MODE_CLEAR]=CreatePen(PS_SOLID, 1, CLR_BG);
+  gDrawData.hFillPen[MODE_X]=CreatePen(PS_SOLID, 1, CLR_DEFAULT);
+  gDrawData.hFillPen[MODE_Y]=CreatePen(PS_SOLID, 1, CLR_DEFAULT);
+  gDrawData.hFillPen[MODE_Z]=CreatePen(PS_SOLID, 1, CLR_DEFAULT);
+  gDrawData.hFillPen[MODE_XY]=CreatePen(PS_SOLID, 1, CLR_XY);
+  gDrawData.hFillPen[MODE_XZ]=CreatePen(PS_SOLID, 1, CLR_XZ);
+  gDrawData.hFillPen[MODE_YZ]=CreatePen(PS_SOLID, 1, CLR_YZ);
+  gDrawData.hFillPen[MODE_XYZ]=CreatePen(PS_SOLID, 1, CLR_XYZ);
 
   gDrawData.maxBoundary.cx = GetSystemMetrics(SM_CXSCREEN);
   gDrawData.maxBoundary.cy = GetSystemMetrics(SM_CYSCREEN);
@@ -109,21 +103,19 @@ void reset(HWND hwnd)
 void addPointToPolygon(HWND hwnd, int x, int y)
 {
   /* the coordinates of the points are stored in an array */
-
+	int nCornerPts = gDrawData.nCornerPts;
   if (gDrawData.nCornerPts < nMaxNoOfCornerPts)
   {
     SelectObject(gDrawData.hdcMem, gDrawData.hDrawPen);
     drawPoint(x,y);
-    gDrawData.cornerPts[gDrawData.nCornerPts].x = x;
-    gDrawData.cornerPts[gDrawData.nCornerPts].y = y;
+    gDrawData.cornerPts[nCornerPts/3][nCornerPts%3].x = x;
+    gDrawData.cornerPts[nCornerPts/3][nCornerPts%3].y = y;
     gDrawData.nCornerPts++;
   }
+  /* if all 3 triangles are selected, render them */
   else
   {
-//    MessageBox(hwnd,
-//     "Maximum number of points reached, closing the polygon", 
-//            "Warning",MB_OK);
-    processRightButtonDown(hwnd);
+    processPolygon(hwnd);
   }
   drawPartialPoly();
 }
@@ -149,13 +141,19 @@ void processLeftButtonDown(HWND hwnd, int x, int y)
   }
 }
 
-void processRightButtonDown(HWND hwnd)
+void processPolygon(HWND hwnd)
 {
-  if (gDrawData.drawMode == DRAW_MODE)
+  if (gDrawData.drawMode == DRAW_MODE and gDrawData.nCornerPts >= 8)
   {
     drawPoly();
     setDrawMode(DRAWN_MODE, hwnd);
     reDraw(hwnd);
+  }
+  else
+  {
+  	MessageBox(hwnd,
+     "Invalid Input", 
+            "Warning",MB_OK);
   }
 }
 
@@ -169,9 +167,6 @@ void processCommonCommand(int cmd, HWND hwnd)
       setDrawMode(READY_MODE, hwnd);
       break;
     case ID_DRAW_POLY:
-//      MessageBox(hwnd,
-//    "Click the right button after clicking the last corner point",
-//       "Remember",MB_OK);
       setDrawMode(DRAW_MODE, hwnd);
       break;
     case ID_EXIT:
@@ -181,20 +176,6 @@ void processCommonCommand(int cmd, HWND hwnd)
         PostQuitMessage(0);
       break;
     default:
-      break;
-  }
-}
-
-void processCommand(int cmd, HWND hwnd)
-{
-  switch(cmd)
-  {
-    case ID_FILL:
-      performFilling(hwnd);
-      drawPoly();
-      break;
-    default:
-      processCommonCommand(cmd, hwnd);
       break;
   }
 }
@@ -224,10 +205,6 @@ LRESULT CALLBACK WindowF(HWND hwnd,UINT message,WPARAM wParam,
       processLeftButtonDown(hwnd, x,y);
       break;
 
-    case WM_RBUTTONDOWN:
-      //processRightButtonDown(hwnd);
-      break;
-
     case WM_PAINT:
       hdc = BeginPaint(hwnd, &ps);
       drawImage(hdc);
@@ -245,4 +222,3 @@ LRESULT CALLBACK WindowF(HWND hwnd,UINT message,WPARAM wParam,
   // Call the default window handler
   return DefWindowProc(hwnd, message, wParam, lParam);
 }
-

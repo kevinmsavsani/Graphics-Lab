@@ -1,8 +1,25 @@
 #include <windows.h>
 #include "Fill.h"
-#include <bits/stdc++.h> 
-using namespace std; 
+
 void fill();
+
+double roundVal(double x)
+{
+  int ix;
+  if (x >= 0) 
+    ix = (int)(x + 0.5);
+  else
+    ix = (int)(x - 0.5);
+  return (double)(ix);
+}
+
+void swap(int &x, int &y)
+{ 
+  int tmp;
+  tmp = x;
+  x = y;
+  y = tmp;
+}
 
 void setupMenus(HWND hwnd)
 {
@@ -41,61 +58,201 @@ void setupMenus(HWND hwnd)
 void performFilling(HWND hwnd)
 {
   setDrawMode(FILL_MODE, hwnd);
-  SelectObject(gDrawData.hdcMem, gDrawData.hFillPen);
+  SelectObject(gDrawData.hdcMem, gDrawData.hFillPen[0]);
   fill();
   reDraw(hwnd);
   setDrawMode(FILLED_MODE, hwnd);
 }
 
-float area(int x1, int y1, int x2, int y2, int x3, int y3) 
-{ 
-   return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0); 
-} 
-  
-bool isInsideTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int x, int y) 
-{    
-   float A = area (x1, y1, x2, y2, x3, y3);   
-   float A1 = area (x, y, x2, y2, x3, y3);   
-   float A2 = area (x1, y1, x, y, x3, y3);  
-   float A3 = area (x1, y1, x2, y2, x, y);     
-   return (A == A1 + A2 + A3); 
-} 
+void processCommand(int cmd, HWND hwnd)
+{
+  switch(cmd)
+  {
+    case ID_FILL:
+      performFilling(hwnd);
+      break;
+    default:
+      processCommonCommand(cmd, hwnd);
+      break;
+  }
+}
+
+bool adjustHorizontallyForBorderPixel(int& x, int y)
+{
+  if (GetPixel(gDrawData.hdcMem, x, y) != CLR_BOUNDARY)  
+  {
+    // if (x,y) is not R(border), R could be on either left or right
+    if (GetPixel(gDrawData.hdcMem, x-1, y) == CLR_BOUNDARY)  
+      x--;
+    else if (GetPixel(gDrawData.hdcMem, x+1, y) == CLR_BOUNDARY)  
+      x++;
+    else
+    {
+      // neither self or left or right neighbor contains border, skip
+      return false; 
+    }
+  }
+  return true;   
+}   
+
+bool adjustForDrawingLine(int& x1, int&x2, int y)
+{
+  // make adjustments for special cases
+  if (adjustHorizontallyForBorderPixel(x1, y) == false)
+    return false;  
+  // start with R...
+  if (adjustHorizontallyForBorderPixel(x2, y) == false)
+    return false;  
+  // end with R...
+  // now we have R...R    
+  if (x2>x1)
+  {
+    // skip RRR.. to move to R...
+    while ((GetPixel(gDrawData.hdcMem, x1, y)) == CLR_BOUNDARY)
+    {
+      x1++;
+    }
+    while ((GetPixel(gDrawData.hdcMem, x2, y)) == CLR_BOUNDARY)
+    {
+      x2--;
+    }
+    x2++;
+    if (x2>x1)
+    {
+      // x1 is set at W (not R), x2 set at R
+      // Windows API LineTo draws upto not including x2
+      return true; 
+    }
+  }
+  return false; // no point of drawing line
+}
+
+void drawLine(int x1, int x2, int y, int penMode)
+{
+  // draw fill-line from (x1,y) to (x2-1,y)
+  if (adjustForDrawingLine(x1, x2, y))
+  {
+  	SelectObject(gDrawData.hdcMem, gDrawData.hFillPen[penMode]);
+    MoveToEx (gDrawData.hdcMem, x1, y, NULL);
+    LineTo (gDrawData.hdcMem, x2, y);
+  }
+}
+
+int edge_cmp(const void *lvp, const void *rvp)
+{
+  /* convert from void pointers to structure pointers */
+  const EDGE_ENTRY *lp = (const EDGE_ENTRY *)lvp;
+  const EDGE_ENTRY *rp = (const EDGE_ENTRY *)rvp;
+
+  /* if the y minimum values are different, compare on minimum y */
+  if (lp->yMin != rp->yMin)
+    return lp->yMin - rp->yMin;
+
+  /* otherwise, if the current x values are different, 
+     compare on current x */
+  return ((int)(roundVal(lp->x))) - ((int)(roundVal(rp->x)));
+}
 
 void fill()
 {
-	bool insideTriangle[3];
-	long X_MIN = gDrawData.cornerPts[0].x;
-	long X_MAX = gDrawData.cornerPts[0].x;
-	long Y_MIN = gDrawData.cornerPts[0].y;
-	long Y_MAX = gDrawData.cornerPts[0].y;
-	for (int i = 1; i < gDrawData.nCornerPts; i++) 
-  	{
-    	X_MIN = min(gDrawData.cornerPts[i].x ,X_MIN);
-    	X_MAX = max(gDrawData.cornerPts[i].x ,X_MAX);   
-		Y_MIN = min(gDrawData.cornerPts[i].y ,Y_MIN);
-		Y_MAX = max(gDrawData.cornerPts[i].y ,Y_MAX);
-	}
-	
-	for(int y = Y_MIN; y <= Y_MAX; y++){	
-		for (int x = X_MIN; x <= X_MAX; x++){
-			COLORREF color = GetPixel(gDrawData.hdcMem, x, y);
-			// check if it is boundary
-			// update the gDrawData
-			if (isInsideTriangle(gDrawData.cornerPts[0].x, gDrawData.cornerPts[0].y, gDrawData.cornerPts[1].x, gDrawData.cornerPts[1].y, gDrawData.cornerPts[2].x, gDrawData.cornerPts[2].y, x, y))		insideTriangle[0] = true;
-			else insideTriangle[0] = false;
-			if (isInsideTriangle(gDrawData.cornerPts[3].x, gDrawData.cornerPts[3].y, gDrawData.cornerPts[4].x, gDrawData.cornerPts[4].y, gDrawData.cornerPts[5].x, gDrawData.cornerPts[5].y, x, y))		insideTriangle[1] = true;
-			else insideTriangle[1] = false;
-			if (isInsideTriangle(gDrawData.cornerPts[6].x, gDrawData.cornerPts[6].y, gDrawData.cornerPts[7].x, gDrawData.cornerPts[7].y, gDrawData.cornerPts[8].x, gDrawData.cornerPts[8].y, x, y))		insideTriangle[2] = true;
-			else insideTriangle[2] = false;
+  EDGE_ENTRY *pGET; // global edge table 
+  int     nGET = 0; // no of records in global edge table 
+  int     cge = 0;  // index to current global edge table entry
 
-			if (insideTriangle[0] && insideTriangle[1] && insideTriangle[2])	SetPixel(gDrawData.hdcMem, x, y, RGB(255, 0, 0));
-			else if (insideTriangle[0] && insideTriangle[1] )	SetPixel(gDrawData.hdcMem, x, y, RGB(0, 0, 255));
-			else if (insideTriangle[1] && insideTriangle[2] )	SetPixel(gDrawData.hdcMem, x, y, RGB(0, 255, 0));
-			else if (insideTriangle[0] && insideTriangle[2] )	SetPixel(gDrawData.hdcMem, x, y, RGB(255, 255, 0));
-			else if (insideTriangle[0] || insideTriangle[1] || insideTriangle[2])	SetPixel(gDrawData.hdcMem, x, y, RGB(0, 255, 255));
-			else SetPixel(gDrawData.hdcMem, x, y, RGB(255, 255, 255));
-		}								
-			
-	}	
+  EDGE_ENTRY *pAET; // active edge table 
+  int nAET = 0; // no of records in active edge table 
+  int x1, y1, x2, y2;// begin and end points of an edge
+  int     i, y, left, right, penMode;
+
+
+  pGET = (EDGE_ENTRY *) calloc(gDrawData.nCornerPts, 
+                               sizeof(EDGE_ENTRY));
+  pAET = (EDGE_ENTRY *) calloc(gDrawData.nCornerPts, 
+                               sizeof(EDGE_ENTRY));
+
+  if ((pGET == NULL) || (pAET == NULL)) 
+  {
+    //error, couldn't allocate one or both of the needed tables 
+    if (pGET)
+      free(pGET);
+    if (pAET)
+      free(pAET);
+    return;
+  }
+  // setup the global edge table 
+  for (i = 0; i < gDrawData.nCornerPts; i++) 
+  {
+    x1 = gDrawData.cornerPts[i/3][i%3].x;
+    y1 = gDrawData.cornerPts[i/3][i%3].y;    
+    x2 = gDrawData.cornerPts[i/3][(i+1)%3].x;
+    y2 = gDrawData.cornerPts[i/3][(i+1)%3].y;
+    
+    if (y1 != y2) 
+    {
+      if (y1 > y2) 
+      {
+        swap(x1, x2);
+        swap(y1, y2);
+      }
+      pGET[nGET].yMin = y1;//corresponds to point having min y
+      pGET[nGET].x = x1; //corresponds to point having min y
+      pGET[nGET].yMax = y2;//corresponds to point having max y         
+      pGET[nGET].mInv = x2 - x1;
+      pGET[nGET].mInv /= y2 - y1;
+      // Type of edge determines the triangle it belongs to. This is used later for coloring
+      pGET[nGET].type = 1<<(i/3);
+      nGET++;
+    }
+  }
+
+  qsort(pGET, nGET, sizeof(EDGE_ENTRY), edge_cmp);
+
+  /* start with the lowest y in the table */
+  y = pGET[0].yMin;
+
+  do 
+  {
+    /* add edges to the active table from the global table */
+    while ((nGET > 0) && (pGET[cge].yMin == y)) 
+    {
+      memcpy(&(pAET[nAET]), &(pGET[cge++]), sizeof(EDGE_ENTRY));
+      nGET--;
+      pAET[nAET++].yMin = 0;
+    }
+    qsort(pAET, nAET, sizeof(EDGE_ENTRY), edge_cmp);
+
+    penMode = MODE_CLEAR;
+    for (i = 1; i < nAET; i += 1) 
+    {
+      left = (int) (roundVal(pAET[i - 1].x));
+      right = (int)(roundVal(pAET[i].x));
+      // penMode is XOR'd with current edge type to determine the fill color
+      // penMode acts as a stack, in which the regions currently under intersection are pushed
+      // The regions get removed by XORing once we encounter an edge with the same type
+      penMode ^= pAET[i-1].type;
+      if (right > left)
+        drawLine(left, right, y, penMode);
+    		
+	   }
+    /* go to the next scan line */
+    y++;
+
+    /* remove inactive edges from the active edge table */
+    /* or update the current x position of active edges */
+    for (i = 0; i < nAET; ++i) 
+    {
+      if (pAET[i].yMax == y)
+        memcpy(&(pAET[i--]), &(pAET[--nAET]), 
+               sizeof(EDGE_ENTRY));
+      else 
+      {
+        pAET[i].x += pAET[i].mInv ;
+      }
+    }
+    /* keep doing this while there are any   edges left */
+  } while ((nAET > 0) || (nGET > 0));
+
+  /* all done, free the edge tables */
+  free(pGET);
+  free(pAET);
 }
-
